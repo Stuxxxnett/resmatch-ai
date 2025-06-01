@@ -1,0 +1,16 @@
+[server]
+headless = true
+port = 7860
+enableCORS = false
+
+[theme]
+base="light"
+
+[general]
+email = "your_email@example.com"
+
+[logger]
+level = "error"
+
+[browser]
+gatherUsageStats = false
