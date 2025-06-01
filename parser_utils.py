@@ -55,4 +55,18 @@ def extract_keywords(text):
 
     return list(extracted_skills)
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def calculate_similarity(resume_keywords, jd_keywords):
+    if not resume_keywords or not jd_keywords:
+        return 0.0
+
+    text_data = [" ".join(resume_keywords), " ".join(jd_keywords)]
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(text_data)
+    similarity_score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+
+    return round(similarity_score * 100, 2)  # return as percentage
+
 
