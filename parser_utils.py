@@ -18,3 +18,18 @@ def get_text_from_file(uploaded_file):
         return extract_text_from_docx(uploaded_file)
     else:
         return "Unsupported file type"
+
+# parser_utils.py
+
+import PyPDF2
+
+def get_text_from_file(uploaded_file):
+    text = ""
+    try:
+        pdf_reader = PyPDF2.PdfReader(uploaded_file)
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+        return text.strip()
+    except Exception as e:
+        return f"Error reading file: {e}"
+
