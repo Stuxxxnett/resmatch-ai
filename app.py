@@ -44,3 +44,14 @@ if missing:
 else:
     st.info("All required skills matched!")
 
+from parser_utils import get_text_from_file, extract_keywords
+
+if uploaded_file is not None:
+    resume_text = get_text_from_file(uploaded_file)
+    st.text_area("Extracted Resume Text", resume_text, height=300)
+
+    skills = extract_keywords(resume_text)
+    st.subheader("Matched Skills:")
+    st.write(", ".join(skills))
+
+
