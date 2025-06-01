@@ -54,4 +54,27 @@ if uploaded_file is not None:
     st.subheader("Matched Skills:")
     st.write(", ".join(skills))
 
+st.subheader("Paste the Job Description")
+job_description = st.text_area("Job Description", height=200)
+
+if job_description:
+    jd_keywords = extract_keywords(job_description)
+    st.subheader("Extracted JD Keywords:")
+    st.write(", ".join(jd_keywords))
+
+from parser_utils import calculate_similarity
+
+if resume_text and job_description:
+    score = calculate_similarity(skills, jd_keywords)
+    st.subheader("Resume–JD Match Score:")
+    st.success(f"{score} %")
+
+    if score > 75:
+        st.info("✅ Great Match! Your resume aligns well.")
+    elif score > 50:
+        st.warning("🟡 Partial Match – consider adding missing skills.")
+    else:
+        st.error("🔴 Low Match – tailor your resume better.")
+
+
 
