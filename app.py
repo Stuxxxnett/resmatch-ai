@@ -76,5 +76,14 @@ if resume_text and job_description:
     else:
         st.error("🔴 Low Match – tailor your resume better.")
 
+# Show matched & missing skills
+matched_skills = list(set(skills) & set(jd_keywords))
+missing_skills = list(set(jd_keywords) - set(skills))
+
+st.subheader("Matched Skills:")
+st.success(", ".join(matched_skills) if matched_skills else "None")
+
+st.subheader("Missing Skills from Resume:")
+st.error(", ".join(missing_skills) if missing_skills else "Great! You covered all keywords.")
 
 
