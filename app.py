@@ -1,72 +1,60 @@
-# app.py
-
 import streamlit as st
-from parser_utils import get_text_from_file
+from parser_utils import get_text_from_file, extract_keywords, calculate_similarity
+from nlp_utils import extract_skills
+import plotly.graph_objects as go
 
 st.title("📄 ResMatch AI - Resume Analyzer")
 
-# --- Resume Upload ---
+# --- Upload Resume ---
 st.header("Upload Your Resume")
-resume_file = st.file_uploader("Choose a PDF or DOCX resume", type=["pdf", "docx"])
+uploaded_file = st.file_uploader("Choose a PDF or DOCX resume", type=["pdf", "docx"])
 
 # --- Job Description Input ---
 st.header("Paste Job Description")
 job_description = st.text_area("Enter the job description here", height=250)
 
-# --- Trigger Text Extraction ---
-if resume_file and job_description:
-    resume_text = get_text_from_file(resume_file)
+# Only process when both are provided
+if uploaded_file and job_description:
+    resume_text = get_text_from_file(uploaded_file)
+    jd_text = job_description
 
+    # Show extracted text preview
     st.subheader("✅ Extracted Resume Text")
-    st.write(resume_text[:1000] + "...")  # Show first 1000 chars
+    st.write(resume_text[:1000] + "...")
 
     st.subheader("✅ Job Description Text")
-    st.write(job_description[:1000] + "...")
+    st.write(jd_text[:1000] + "...")
 
-from nlp_utils import extract_skills
+    # Extract skills
+    resume_skills = extract_skills(resume_text)
+    jd_skills = extract_skills(jd_text)
 
-resume_skills = extract_skills(resume_text)
-jd_skills = extract_skills(job_description)
+    st.subheader("🧠 Resume Skills Extracted")
+    st.write(resume_skills)
 
-match_score = round(len(set(resume_skills) & set(jd_skills)) / len(set(jd_skills)) * 100, 2)
+    st.subheader("📌 Job Description Skills Required")
+    st.write(jd_skills)
 
-st.subheader("🧠 Resume Skills Extracted")
-st.write(resume_skills)
+    # Match Score (skill overlap)
+    if jd_skills:
+        match_score = round(len(set(resume_skills) & set(jd_skills)) / len(set(jd_skills)) * 100, 2)
+        st.success(f"✅ **Match Score: {match_score}%**")
 
-st.subheader("📌 Job Description Skills Required")
-st.write(jd_skills)
+        missing_skills = list(set(jd_skills) - set(resume_skills))
+        if missing_skills:
+            st.warning(f"⚠️ Missing Skills: {', '.join(missing_skills)}")
+        else:
+            st.info("All required skills matched!")
 
-st.success(f"✅ **Match Score: {match_score}%**")
+    else:
+        st.warning("No skills were extracted from the job description.")
 
-missing = list(set(jd_skills) - set(resume_skills))
-if missing:
-    st.warning(f"⚠️ Missing Skills: {', '.join(missing)}")
-else:
-    st.info("All required skills matched!")
+    # Advanced Similarity
+    resume_keywords = extract_keywords(resume_text)
+    jd_keywords = extract_keywords(jd_text)
 
-from parser_utils import get_text_from_file, extract_keywords
-
-if uploaded_file is not None:
-    resume_text = get_text_from_file(uploaded_file)
-    st.text_area("Extracted Resume Text", resume_text, height=300)
-
-    skills = extract_keywords(resume_text)
-    st.subheader("Matched Skills:")
-    st.write(", ".join(skills))
-
-st.subheader("Paste the Job Description")
-job_description = st.text_area("Job Description", height=200)
-
-if job_description:
-    jd_keywords = extract_keywords(job_description)
-    st.subheader("Extracted JD Keywords:")
-    st.write(", ".join(jd_keywords))
-
-from parser_utils import calculate_similarity
-
-if resume_text and job_description:
-    score = calculate_similarity(skills, jd_keywords)
-    st.subheader("Resume–JD Match Score:")
+    score = calculate_similarity(resume_keywords, jd_keywords)
+    st.subheader("🔍 Resume–JD Semantic Match Score")
     st.success(f"{score} %")
 
     if score > 75:
@@ -76,26 +64,21 @@ if resume_text and job_description:
     else:
         st.error("🔴 Low Match – tailor your resume better.")
 
-# Show matched & missing skills
-matched_skills = list(set(skills) & set(jd_keywords))
-missing_skills = list(set(jd_keywords) - set(skills))
+    # Visual Skill Comparison
+    matched = list(set(resume_keywords) & set(jd_keywords))
+    missing = list(set(jd_keywords) - set(resume_keywords))
 
-st.subheader("Matched Skills:")
-st.success(", ".join(matched_skills) if matched_skills else "None")
+    st.subheader("Matched Skills:")
+    st.success(", ".join(matched) if matched else "None")
 
-st.subheader("Missing Skills from Resume:")
-st.error(", ".join(missing_skills) if missing_skills else "Great! You covered all keywords.")
+    st.subheader("Missing Skills from Resume:")
+    st.error(", ".join(missing) if missing else "Great! You covered all keywords.")
 
-st.subheader("Match Percentage:")
-st.progress(int(score))
+    st.subheader("Match Percentage Visualization")
+    st.progress(int(score))
 
-import plotly.graph_objects as go
-
-labels = ['Match', 'Gap']
-values = [len(matched_skills), len(missing_skills)]
-
-fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
-st.plotly_chart(fig)
-
-
-
+    # Pie Chart
+    labels = ['Match', 'Gap']
+    values = [len(matched), len(missing)]
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
+    st.plotly_chart(fig)
