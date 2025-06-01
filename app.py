@@ -22,3 +22,25 @@ if resume_file and job_description:
 
     st.subheader("✅ Job Description Text")
     st.write(job_description[:1000] + "...")
+
+from nlp_utils import extract_skills
+
+resume_skills = extract_skills(resume_text)
+jd_skills = extract_skills(job_description)
+
+match_score = round(len(set(resume_skills) & set(jd_skills)) / len(set(jd_skills)) * 100, 2)
+
+st.subheader("🧠 Resume Skills Extracted")
+st.write(resume_skills)
+
+st.subheader("📌 Job Description Skills Required")
+st.write(jd_skills)
+
+st.success(f"✅ **Match Score: {match_score}%**")
+
+missing = list(set(jd_skills) - set(resume_skills))
+if missing:
+    st.warning(f"⚠️ Missing Skills: {', '.join(missing)}")
+else:
+    st.info("All required skills matched!")
+
