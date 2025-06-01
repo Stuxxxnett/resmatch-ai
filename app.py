@@ -86,4 +86,16 @@ st.success(", ".join(matched_skills) if matched_skills else "None")
 st.subheader("Missing Skills from Resume:")
 st.error(", ".join(missing_skills) if missing_skills else "Great! You covered all keywords.")
 
+st.subheader("Match Percentage:")
+st.progress(int(score))
+
+import plotly.graph_objects as go
+
+labels = ['Match', 'Gap']
+values = [len(matched_skills), len(missing_skills)]
+
+fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
+st.plotly_chart(fig)
+
+
 
