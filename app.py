@@ -1,5 +1,10 @@
 # app.py
 
+import os
+
+# Force Streamlit to listen on external port (for Render)
+os.environ["PORT"] = os.environ.get("PORT", "8501")
+
 import streamlit as st
 from parser_utils import get_text_from_file
 
