@@ -33,3 +33,26 @@ def get_text_from_file(uploaded_file):
     except Exception as e:
         return f"Error reading file: {e}"
 
+import spacy
+
+# Load spaCy model globally
+nlp = spacy.load("en_core_web_sm")
+
+# Define basic skill keywords (can be expanded later)
+SKILL_KEYWORDS = [
+    "python", "c++", "java", "machine learning", "deep learning",
+    "public speaking", "teamwork", "communication", "data analysis",
+    "problem solving", "sql", "pandas", "numpy", "linux"
+]
+
+def extract_keywords(text):
+    doc = nlp(text.lower())
+    extracted_skills = set()
+
+    for token in doc:
+        if token.text in SKILL_KEYWORDS:
+            extracted_skills.add(token.text)
+
+    return list(extracted_skills)
+
+
